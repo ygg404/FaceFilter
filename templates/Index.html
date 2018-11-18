@@ -1,0 +1,208 @@
+<!DOCTYPE>
+<html class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>美颜滤镜</title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-siteapp"/>
+  <link rel="stylesheet" href="/static/assets/css/amazeui.min.css">
+  <link rel="stylesheet" href="/static/assets/css/app.css">
+  <link rel="stylesheet" href="/static/assets/css/myslider.css">
+
+</head>
+<body>
+<div class="am-g myapp-login">
+	<div class="myapp-login-logo-block">
+		<div class="myapp-login-logo-text">
+			<div class="myapp-login-logo-text">
+				<span>美颜滤镜</span> <i class="am-icon-skyatlas"></i>
+			</div>
+		</div>
+
+		<div class="am-u-sm-10 login-am-center">
+
+            <div class="myapp-image">
+                <img id="faceImg" src="/static/assets/images/uplaod.png"  alt="" onload="faceDetect()">
+                <canvas id="canvas" ></canvas>
+                <input id="fileImage" type="file"  accept="image/*" multiple="multiple" size="30">
+            </div>
+
+		</div>
+
+        <div class="inputdiv">
+            <ul>
+                下巴:  <input id="face" type="range" value="50" >
+            </ul>
+            <ul>
+                眼睛:  <input id="eye" type="range" value="50" >
+            </ul>
+            <ul>
+                鼻子:  <input id="nose" type="range" value="50" >
+            </ul>
+            <ul>
+                鼻窦:  <input id="bean" type="range" value="50" >
+            </ul>
+        </div>
+
+	</div>
+</div>
+
+<script src="/static/assets/js/jquery.min.js"></script>
+<script src="/static/assets/js/amazeui.min.js"></script>
+<script src="/static/assets/js/app.js"></script>
+<script src="/static/scripts/myjs/RangeSlider.js"></script>
+<script src="/static/assets/js/amazeui.dialog.min.js"></script>
+<script src="/static/scripts/myjs/faceFilter.js"></script>
+
+<script>
+    //原图片数据
+    var oFaceDat;
+    var oImg = new Image();
+    //人脸标注点
+    var marks;
+    //画板
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+
+    //图片显示
+    var compressPicture = function (imgId, blob) {
+        //拍照上传
+        var maxH = 800;
+        var maxW = 800;
+        var quality = 0.5, image = new Image();
+        image.src = blob;
+        image.onload = function () {
+            var that = this;
+            // 生成比例
+            var width = that.width, height = that.height;
+            //判断上传图片是否超过最大值
+            if (width > maxW || height > maxH) {
+                if (width > height) {
+                    height = height * maxW / width;
+                    width = maxW;
+                } else {
+                    width = width * maxH / height;
+                    height = maxH;
+                }
+            }
+
+            canvas.width = parseInt(width);
+            canvas.height = parseInt(height);
+            ctx.drawImage(that, 0, 0, parseInt(width), parseInt(height));
+            // 生成base64,兼容修复移动设备需要引入mobileBUGFix.js
+            var imgurl = canvas.toDataURL('image/jpeg', quality);
+            // 修复IOS兼容问题
+            if (navigator.userAgent.match(/iphone/i)) {
+                var mpImg = new MegaPixImage(image);
+                mpImg.render(canvas, {
+                    maxWidth: width,
+                    maxHeight: height,
+                    quality: quality
+                });
+                imgurl = canvas.toDataURL('image/jpeg', quality);
+            }
+            $('#' + imgId).attr("src", imgurl);
+            oFaceDat = ctx.getImageData( 0, 0, that.width, that.height );
+            oImg.width = oFaceDat.width;
+            oImg.height = oFaceDat.height;
+            oImg.data = oFaceDat.data.slice(0);
+        };
+    };
+
+    function reBindUploadFile() {
+        $('#fileImage').change(function () {
+            var file = document.getElementById('fileImage').files[0];
+            var src = window.URL.createObjectURL(file);
+            $('#faceImg').attr("src", "");
+            var reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function (event) {
+                compressPicture('faceImg', event.target.result);
+
+            }
+        });
+    }
+
+    function faceDetect(){
+        var progress = $.AMUI.progress;
+        $.ajax({
+            url:'/Filter/facedetect',
+            type:"POST",
+            data:  { imgdata : $('#faceImg').attr('src').replace(/^data:image\/(jpeg|png|gif);base64,/i,''), },
+             beforeSend: function(){
+                // Handle the beforeSend event
+                 progress.start();
+            },
+            success:function(data){
+                if(data.StatusCode == 1){
+                    //获取人脸成功 且人脸为1
+                    //初始化图片数据类
+                    marks = data.result;
+
+                }else{
+                    AMUI.dialog.alert({
+                        title: '错误提示',
+                        content: data.message,
+                        onConfirm: function(){; }
+                    });
+                }
+            },
+            complete: function () {
+                sliderInit();
+                progress.done();
+                reBindUploadFile();
+            }
+        });
+    }
+
+    var change = function($input) {
+        /*进度条低于50%为缩放*/
+        var Val = 60;
+        var chinStrength = ($('#face').attr("value") - 50 ) * Val /100;
+        var eyeStrength = ($('#eye').attr("value") - 50 ) * Val/100;
+        var noseStrength = ($('#nose').attr("value") -50) * Val/100;
+        var beanStrength = ($('#bean').attr("value") -50) * Val/100;
+
+        /*复制原图片*/
+        var dImg = new Image();
+        dImg.width = oImg.width;
+        dImg.height = oImg.height;
+        dImg.data = oImg.data.slice(0);
+        /*处理图片*/
+        var dFace = draw( dImg,chinStrength , eyeStrength ,noseStrength ,beanStrength, marks);
+        for(var i=0;i<dFace.data.length;i++)
+            oFaceDat.data[i] = dFace.data[i];
+        ctx.putImageData(oFaceDat,0,0);
+
+        console.log($input.id + $input.value);
+    }
+
+    //滑动条初始化
+    function sliderInit(){
+        $('#face').val('50');
+        $('#eye').val('50');
+        $('#nose').val('50');
+        $('#bean').val('50');
+    }
+
+    $(function () {
+       //$('.slideControl').slideControl();
+        $('#face').RangeSlider({ min: 0,   max: 100,  step: 0.1,  callback: change});
+        $('#eye').RangeSlider({ min: 0,   max: 100,  step: 0.1,  callback: change});
+        $('#nose').RangeSlider({ min: 0,   max: 100,  step: 0.1,  callback: change});
+        $('#bean').RangeSlider({ min: 0,   max: 100,  step: 0.1,  callback: change});
+{#        $('#face').css( 'background-size', '50% 100%' );#}
+{#        $('#eye').css( 'background-size', '50% 100%' );#}
+{#        $('#nose').css( 'background-size', '50% 100%' );#}
+{#        $('#bean').css( 'background-size', '50% 100%' );#}
+        reBindUploadFile();
+     });
+
+</script>
+</body>
+</html>
