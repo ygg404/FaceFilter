@@ -18,16 +18,8 @@ $.fn.RangeSlider = function(cfg){
 
     $input.bind("input", function(e){
         $input.attr('value', this.value);
-        if(this.value<50){
-           $input.css( 'background', '#fad1f0');
-            $input.css( 'background-size', this.value + '% 50%' );
+        $input.css( 'background-size',  this.value + '% 100%' );
 
-        }
-        else{
-            $input.css( 'background', '#fa13f6');
-            $input.css( 'background-size', '50% ' +this.value + '%' );
-
-        }
         //background: linear-gradient(to right, #fad1f0, #ffa7f7 100%, #ffa7f7);
         if ($.isFunction(callback)) {
             callback(this);

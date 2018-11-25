@@ -188,6 +188,10 @@
         $('#eye').val('50');
         $('#nose').val('50');
         $('#bean').val('50');
+        $('#face').css( 'background-size', '50% 100%' );
+        $('#eye').css( 'background-size', '50% 100%' );
+        $('#nose').css( 'background-size', '50% 100%' );
+        $('#bean').css( 'background-size', '50% 100%' );
     }
 
     $(function () {
@@ -196,10 +200,7 @@
         $('#eye').RangeSlider({ min: 0,   max: 100,  step: 0.1,  callback: change});
         $('#nose').RangeSlider({ min: 0,   max: 100,  step: 0.1,  callback: change});
         $('#bean').RangeSlider({ min: 0,   max: 100,  step: 0.1,  callback: change});
-{#        $('#face').css( 'background-size', '50% 100%' );#}
-{#        $('#eye').css( 'background-size', '50% 100%' );#}
-{#        $('#nose').css( 'background-size', '50% 100%' );#}
-{#        $('#bean').css( 'background-size', '50% 100%' );#}
+        sliderInit();
         reBindUploadFile();
      });
 
