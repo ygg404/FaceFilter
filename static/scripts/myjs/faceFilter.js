@@ -285,10 +285,10 @@ function draw(oFaceDat ,chinStrength,eyeStrength,noseStrength,nBeanStrength, mar
     fData.dface = oFaceDat;
     fData.dface.data = oFaceDat.data.slice(0);
 
-    chinChange(chinStrength);  //下巴
-    eyeChange(eyeStrength);   //眼睛
-    noseChange(noseStrength); //鼻孔
-    nBeanChange(nBeanStrength); //鼻窦
+    if( Math.abs(chinStrength)>1)chinChange(chinStrength);  //下巴
+    if( Math.abs(eyeStrength)>1)eyeChange(eyeStrength);   //眼睛
+    if( Math.abs(noseStrength)>1)noseChange(noseStrength); //鼻孔
+    if( Math.abs(nBeanStrength)>1)nBeanChange(nBeanStrength); //鼻窦
 
     return fData.dface;
 }

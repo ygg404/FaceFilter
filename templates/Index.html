@@ -72,8 +72,8 @@
     //图片显示
     var compressPicture = function (imgId, blob) {
         //拍照上传
-        var maxH = 800;
-        var maxW = 800;
+        var maxH = 700;
+        var maxW = 700;
         var quality = 0.5, image = new Image();
         image.src = blob;
         image.onload = function () {
@@ -104,10 +104,10 @@
                     maxHeight: height,
                     quality: quality
                 });
-                imgurl = canvas.toDataURL('image/jpeg', quality);
+                imgurl = canvas.toDataURL('image/jpg', quality);
             }
             $('#' + imgId).attr("src", imgurl);
-            oFaceDat = ctx.getImageData( 0, 0, that.width, that.height );
+            oFaceDat = ctx.getImageData( 0, 0, width, height );
             oImg.width = oFaceDat.width;
             oImg.height = oFaceDat.height;
             oImg.data = oFaceDat.data.slice(0);
@@ -133,7 +133,7 @@
         $.ajax({
             url:'/Filter/facedetect',
             type:"POST",
-            data:  { imgdata : $('#faceImg').attr('src').replace(/^data:image\/(jpeg|png|gif);base64,/i,''), },
+            data:  { imgdata : $('#faceImg').attr('src').replace(/^data:image\/(jpg|jpeg|png|gif);base64,/i,''), },
              beforeSend: function(){
                 // Handle the beforeSend event
                  progress.start();
