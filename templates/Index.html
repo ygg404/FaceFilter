@@ -153,8 +153,9 @@
                 }
             },
             complete: function () {
-                sliderInit();
+
                 progress.done();
+                sliderInit();
                 reBindUploadFile();
             }
         });
@@ -188,6 +189,10 @@
         $('#eye').val('50');
         $('#nose').val('50');
         $('#bean').val('50');
+        $('#face').attr("value" ,'50');
+        $('#eye').attr("value" ,'50');
+        $('#nose').attr("value" ,'50');
+        $('#bean').attr("value" ,'50');
         $('#face').css( 'background-size', '50% 100%' );
         $('#eye').css( 'background-size', '50% 100%' );
         $('#nose').css( 'background-size', '50% 100%' );
