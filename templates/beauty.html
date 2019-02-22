@@ -1,0 +1,107 @@
+<!DOCTYPE>
+<html class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>颜值测试</title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-siteapp"/>
+  <link rel="stylesheet" href="/static/assets/css/amazeui.min.css">
+  <link rel="stylesheet" href="/static/assets/css/app.css">
+</head>
+<body>
+<div class="am-g myapp-login">
+	<div class="myapp-login-logo-block">
+		<div class="myapp-login-logo-text">
+			<div class="myapp-login-logo-text">
+				<span>颜值测试</span> <i class="am-icon-skyatlas"></i>
+			</div>
+		</div>
+
+		<div class="am-u-sm-10 login-am-center">
+
+            <div class="myapp-image">
+                <img id="faceImg" src="/static/assets/images/uplaod.png"  alt="" >
+                <input id="fileImage" type="file"  accept="image/*" multiple="multiple" size="30">
+            </div>
+
+		</div>
+
+        <div class="am-u-sm-10 login-am-center">
+            <div style="text-align: center">年龄：<span id="age" style="color: red"></span></div>
+            <div style="text-align: center">性别：<span id="gender" style="color: red"></span></div>
+            <div style="text-align: center">颜值：<span id="beauty" style="color: red"></span></div>
+        </div>
+
+	</div>
+</div>
+
+<script src="/static/assets/js/jquery.min.js"></script>
+<script src="/static/assets/js/amazeui.min.js"></script>
+<script src="/static/assets/js/app.js"></script>
+<script src="/static/assets/js/amazeui.dialog.min.js"></script>
+<script  src="/static/lrz/lrz.bundle.js"></script>
+<script>
+
+    function reBindUploadFile() {
+        $('#fileImage').change(function () {
+            document.querySelector('#fileImage').addEventListener('change', function () {
+                lrz(this.files[0])
+                    .then(function (rst) {
+                        // 处理成功会执行
+                        $('#faceImg').attr('src',rst.base64);
+                        faceDetect();
+                        console.log(rst);
+                    })
+                    .catch(function (err) {
+                        // 处理失败会执行
+                    })
+                    .always(function () {
+                        // 不管是成功失败，都会执行
+                        //reBindUploadFile();
+                    });
+            });
+        });
+    }
+
+    function faceDetect(){
+        var progress = $.AMUI.progress;
+        $.ajax({
+            url:'/Beauty/beautydetect',
+            type:"POST",
+            dataType:'json',
+            data:  { imgdata : $('#faceImg').attr('src').replace(/^data:image\/(jpg|jpeg|png|gif);base64,/i,''), },
+            beforeSend: function(){
+                // Handle the beforeSend event
+                 progress.start();
+            },
+            success:function(data){
+                if(data.StatusCode == -1){
+                    AMUI.dialog.alert({
+                        title: '错误提示',
+                        content: data.message,
+                        onConfirm: function(){; }
+                    });
+                }else{
+                    $('#age').html( data.result.face_list[0]["age"] );
+                    $('#gender').html( data.result.face_list[0]["gender"]["type"] )
+                    $('#beauty').html( data.result.face_list[0]["beauty"] );
+                }
+            },
+            complete: function () {
+                progress.done();
+            }
+        });
+    }
+
+    $(function () {
+        reBindUploadFile();
+     });
+
+</script>
+</body>
+</html>

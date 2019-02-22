@@ -19,4 +19,5 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^$', admin.site.urls),
     url(r'^Filter/', include('Filter.urls',namespace='Filter')),
+    url(r'^Beauty/', include('Beauty.urls',namespace='Beauty')),
 ]
